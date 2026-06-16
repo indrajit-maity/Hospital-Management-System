@@ -1,15 +1,15 @@
 package com.HospitalManagement.ManagedHospital.dto;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class CreateAppointmentRequestDto {
     private  Long doctor_id;
     private  Long patient_id;

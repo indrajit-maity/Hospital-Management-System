@@ -1,0 +1,13 @@
+#applicatio use to define properties like application.properties but this is more user friendly
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 467465940455-kui6g6946crev4ft9k528jt8mk6bb21e.apps.googleusercontent.com
+            client-secret: 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
+          github:
+            client-id: enfefnnshioe
+            client-secret: jrnfjernfj

@@ -1,6 +1,7 @@
 package com.HospitalManagement.ManagedHospital.entity;
 
 import com.HospitalManagement.ManagedHospital.Security.RolePermissionMapping;
+import com.HospitalManagement.ManagedHospital.entity.type.AuthProviderType;
 import com.HospitalManagement.ManagedHospital.entity.type.RoleType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,8 +30,12 @@ public class User implements UserDetails {
     private String username;
     private String password;
 
-    private String Providerid;
+    @Column(name="providerid")
+    private String providerId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auth_provider_type")
+    private AuthProviderType providerType;
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
             @Builder.Default

@@ -30,20 +30,24 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
             log.info("incoming request:{}",request.getRequestURI());
-            final String requestTokenHeader= request.getHeader("Authorization");
-            if(requestTokenHeader==null || !requestTokenHeader.startsWith("Bearer")){
-                filterChain.doFilter(request,response);
-                return;
-            }
-            String token=requestTokenHeader.split("Bearer ")[1];
-            String UserName=authUtil.getUsernameFromToken(token);
-        if(UserName!=null && SecurityContextHolder.getContext().getAuthentication()==null){
-            User user=userRepository.findByUsername(UserName).orElseThrow();
-            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken=new
-                    UsernamePasswordAuthenticationToken(user,null,user.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-            System.out.println(SecurityContextHolder.getContext().getAuthentication());
-             }
-        filterChain.doFilter(request,response);
+            try {
+                final String requestTokenHeader = request.getHeader("Authorization");
+                if (requestTokenHeader == null || !requestTokenHeader.startsWith("Bearer")) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+                String token = requestTokenHeader.split("Bearer ")[1];
+                String UserName = authUtil.getUsernameFromToken(token);
+                if (UserName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    User user = userRepository.findByUsername(UserName).orElseThrow();
+                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new
+                            UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                    System.out.println(SecurityContextHolder.getContext().getAuthentication());
+                }
+                filterChain.doFilter(request, response);
+            }catch(Exception ex){
+                handlerExceptionResolver.resolveException(request,response,null,ex);
+        }
     }
 }
