@@ -25,7 +25,7 @@ public class DoctorController {
     private  final DoctorService doctorService;
 
     @Operation(summary = "Get all doctors")
-    @GetMapping
+    @GetMapping("/doctors")
     public ResponseEntity<List<DoctorResponseDto>> getAlldoctor(
             @RequestParam(value = "page",defaultValue = "0") Integer pageNumber,
             @RequestParam(value="size",defaultValue = "5") Integer size

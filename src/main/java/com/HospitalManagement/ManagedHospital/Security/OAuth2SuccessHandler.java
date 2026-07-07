@@ -1,10 +1,14 @@
 package com.HospitalManagement.ManagedHospital.Security;
 
 
+import com.HospitalManagement.ManagedHospital.dto.LoginResponseDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -20,19 +24,16 @@ import java.util.Map;
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private final AuthService authService;
+    private  final ObjectMapper objectMapper;
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+        System.out.println(request.getCookies());
         OAuth2AuthenticationToken token= (OAuth2AuthenticationToken) authentication;
         OAuth2User oAuth2User=(OAuth2User) authentication.getPrincipal();
-//        String registrationId= token.getAuthorizedClientRegistrationId();
-//        authService.handleOAuth2LoginRequest(oAuth2User,registrationId);
-        Map<String,Object> attributes=oAuth2User.getAttributes();
-        String email=(String) attributes.get("email");
-        String name=(String) attributes.get("name");
-        String picture=(String) attributes.get("picture");
-        String googleId=(String) attributes.get("sub");
-        System.out.println(email);
-        System.out.println(name);
-        System.out.println(googleId);
+        String registrationId= token.getAuthorizedClientRegistrationId();
+//        ResponseEntity<LoginResponseDto> loginResponse=authService.handleOAuth2LoginRequest(oAuth2User,registrationId);
+//        response.setStatus(loginResponse.getStatusCode().value());
+//        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+//        response.getWriter().write(objectMapper.writeValueAsString(loginResponse.getBody()));
     }
 }

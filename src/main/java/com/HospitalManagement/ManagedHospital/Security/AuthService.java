@@ -3,6 +3,7 @@ package com.HospitalManagement.ManagedHospital.Security;
 
 import com.HospitalManagement.ManagedHospital.dto.LoginRequestDto;
 import com.HospitalManagement.ManagedHospital.dto.LoginResponseDto;
+import com.HospitalManagement.ManagedHospital.dto.SignupRequestDto;
 import com.HospitalManagement.ManagedHospital.dto.SignupResponseDto;
 import com.HospitalManagement.ManagedHospital.entity.User;
 import com.HospitalManagement.ManagedHospital.entity.type.AuthProviderType;
@@ -33,24 +34,31 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     public LoginResponseDto login(LoginRequestDto loginRequestDto) {
+        System.out.println("hiii");
         Authentication authentication=authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequestDto.getUsername(),loginRequestDto.getPassword()));
         User user=(User) authentication.getPrincipal();
     String token=authUtil.generateAccessToken(user);
+    System.out.println("hiiiii!");
     System.out.println(token);
     return new LoginResponseDto(token,user.getId());
     }
 
-    public SignupResponseDto signUp(LoginRequestDto signupRequestDto) {
-        User user=userRepository.findByUsername(signupRequestDto.getUsername()).orElse(null);
+    public SignupResponseDto signUp(SignupRequestDto signupRequestDto) {
+//        User user=userRepository.findByUsername(signupRequestDto.getUsername()).orElse(null);
+        User user=userRepository.findByEmail(signupRequestDto.getEmail()).orElse(null);
         if(user!=null) throw new IllegalArgumentException("User already exits");
         user =userRepository.save(User.builder()
                 .username(signupRequestDto.getUsername())
+                .email(signupRequestDto.getEmail())
                 .password( passwordEncoder.encode(signupRequestDto.getPassword()))
                 .build()
         );
         return modelMapper.map(user,SignupResponseDto.class);
     }
+
+
+
 
     public ResponseEntity<LoginResponseDto> handleOAuth2LoginRequest(OAuth2User oAuth2User, String registrationId) {
         //fetch provider type and provider id to identify platform(google,github,.......)
@@ -61,12 +69,13 @@ public class AuthService {
         Optional<User> userObj=userRepository.findByProviderIdAndProviderType(providerId,authProviderType);
         User user=userObj.get();
         String email=oAuth2User.getAttribute("email");
-        User emailUser=userRepository.findByUsername(email).orElse(null);
+        User emailUser=userRepository.findByEmail(email).orElse(null);
 
         if(user==null && emailUser==null){
             //Signup flow
             String userName= authUtil.determineUsernameFromOAuth2User(oAuth2User,registrationId,providerId);
-            SignupResponseDto signupResponseDto=signUp(new LoginRequestDto(userName,null));
+//            String email=authUtil.determineEmailFromOAuth2User(oAuth2User,registrationId,providerId);
+            SignupResponseDto signupResponseDto=signUp(new SignupRequestDto(userName,null,email));
         }
         else if(user!=null){
             if(email!=null && !email.isBlank() && email.equals(user.getUsername())){

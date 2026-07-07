@@ -27,8 +27,10 @@ public class PatientService {
 
     @Transactional
     public PatientDto createnewPatient(PatientDto patientDto) {
+        System.out.println("Before Save");
         Patient newpatient=modelMapper.map(patientDto,Patient.class);
         Patient patient=patientRepositry.save(newpatient);
+        System.out.println("After Save: "+patient.getId());
         return modelMapper.map(patient,PatientDto.class);
     }
 

@@ -30,21 +30,26 @@ public class WebSecurityConfig {
     private  final JwtAuthFilter jwtAuthFilter;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
+    private static final String[] SWAGGER_WHITELIST = {
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/v3/api-docs/**",
+            "/v3/api-docs.yaml",
+            "/swagger-resources/**",
+            "/webjars/**"
+    };
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-                .csrf(csrfConfig-> csrfConfig.disable())
+                .csrf(csrfConfig-> csrfConfig.disable()) //cross-site request forgery,this is disable because we use jwt authentication
                 .sessionManagement(sessionConfig->sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth-> auth
-                                .requestMatchers("/patient/**").permitAll()
-                                .requestMatchers("/swagger-ui/**",
-                                        "/v3/api-docs/**",
-                                        "/swagger-ui.html").permitAll()
-                                .requestMatchers("/auth/sign-up","/auth/log-in").permitAll()
-//                        .requestMatchers("/admin/**").authenticated()
-//                        .requestMatchers("/admin/patients").hasRole("Admin")
-//                        .requestMatchers("/admin/**").hasAnyRole("Doctor","Admin")
-                                .anyRequest().authenticated()
+                        .requestMatchers("/admin/home").permitAll()
+                        .requestMatchers(SWAGGER_WHITELIST).permitAll()
+                        .requestMatchers("/auth/**").permitAll()
+//                        .requestMatchers("/patient/newPatient").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2->oauth2
@@ -53,8 +58,8 @@ public class WebSecurityConfig {
                             log.error("OAuth2 error: {}",exception.getMessage());
                         })
                         .successHandler(oAuth2SuccessHandler)
+//                        .defaultSuccessUrl("/swagger-ui.html",true)
                 );
-//                .formLogin(form->form.permitAll());//this is browser
 
         return httpSecurity.build();
     }

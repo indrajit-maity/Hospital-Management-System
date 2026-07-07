@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class RolePermissionMapping {
+//    public static Set<SimpleGrantedAuthority> getAuthoritiesForRole() {
+//    }
 
 //    private static final RoleType PATIENT = ;
 //    private static  final Map<RoleType,Set<PermissionType>> map= Map.of(

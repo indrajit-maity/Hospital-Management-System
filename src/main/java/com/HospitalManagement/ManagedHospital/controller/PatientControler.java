@@ -40,7 +40,9 @@ public class PatientControler {
 @Operation(summary = "add patient")
     @PostMapping("/newPatient")
     public ResponseEntity<PatientDto> Addpatient(@RequestBody PatientDto patientDto){
+        System.out.println("Controller reached");
         return ResponseEntity.status(HttpStatus.CREATED).body(patientService.createnewPatient(patientDto));
+
     }
 @Operation(summary = "Create appointment")
     @PostMapping("/newAppointment")

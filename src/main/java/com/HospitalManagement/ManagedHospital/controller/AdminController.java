@@ -24,6 +24,11 @@ public class AdminController {
     private final PatientService patientService;
     private final DoctorService doctorService;
 
+    @GetMapping("/home")
+    public String Home(){
+        return "Wellcome!!!!";
+    }
+
     @Operation(summary = "Get all Patients")
     @GetMapping("/patients")
     public ResponseEntity<List<PatientResponseDto>> getAllPatients(
@@ -33,7 +38,7 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.CREATED).body(patientService.getAllpatient(pageNumber,pageSize));
     }
 
-    @Operation(summary = "Add new patient")
+    @Operation(summary = "Add new Doctor")
     @PostMapping("/onBoardnewDoctor")
     public  ResponseEntity<DoctorResponseDto> onBoardnewdoctor(@RequestBody OnboardDoctorRequestDto onboardDoctorRequestDto){
         return ResponseEntity.status(HttpStatus.CREATED).body(doctorService.OnboardNewdoctor(onboardDoctorRequestDto));

@@ -4,6 +4,7 @@ package com.HospitalManagement.ManagedHospital.controller;
 import com.HospitalManagement.ManagedHospital.Security.AuthService;
 import com.HospitalManagement.ManagedHospital.dto.LoginRequestDto;
 import com.HospitalManagement.ManagedHospital.dto.LoginResponseDto;
+import com.HospitalManagement.ManagedHospital.dto.SignupRequestDto;
 import com.HospitalManagement.ManagedHospital.dto.SignupResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,8 +32,8 @@ public class AuthController {
 
     @Operation(summary = "SignIn")
     @PostMapping("/sign-up")
-
-    public ResponseEntity<SignupResponseDto> signup(@RequestBody LoginRequestDto signupRequestDto){
+    public ResponseEntity<SignupResponseDto> signup(@RequestBody SignupRequestDto signupRequestDto){
+        System.out.println("welcome");
         return  ResponseEntity.status(HttpStatus.CREATED).body(authService.signUp(signupRequestDto));
     }
 

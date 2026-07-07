@@ -20,6 +20,10 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Table(name = "user",indexes ={
+        @Index(
+                name = "idx_provider_id_provider_type",
+                columnList = "providerid, auth_provider_type")})
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +31,9 @@ public class User implements UserDetails {
     private Long id;
 
     @Column(unique = true,nullable = false)
-    private String username;
+    private String username;//here we can store email,may be any id  or name
+    @Column(unique = true,nullable = false)
+    private String email;
     private String password;
 
     @Column(name="providerid")
@@ -62,8 +68,10 @@ public class User implements UserDetails {
 //        } );
 //        return authorities;
 //    }
+//
+
     @Override
-    public  Collection<? extends  GrantedAuthority> getAuthorities(){
-        return List.of();
+    public Collection<? extends GrantedAuthority> getAuthorities(){
+        return  List.of();
     }
 }
