@@ -74,7 +74,7 @@ public class AuthUtil {
         };
         if(providerId==null||providerId.isBlank()){
             log.error("Unable to determine providerid for provider: {}",registrationId);
-            throw  new IllegalArgumentException("Unable to determine providerid for provider: {}"+registrationId);
+            throw  new IllegalArgumentException("Unable to determine providerid for provider: "+registrationId);
         }
         return providerId;
     }
