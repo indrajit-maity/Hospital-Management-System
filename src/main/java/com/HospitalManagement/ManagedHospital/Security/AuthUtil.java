@@ -35,6 +35,7 @@ public class AuthUtil {
         return Jwts.builder()
                 .subject(user.getUsername())
                 .claim("userId",user.getId().toString())
+                .claim("email",user.getEmail())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis()+1000*60*10))
                 .signWith(getSecretKey())
@@ -80,9 +81,10 @@ public class AuthUtil {
     }
 
     public String determineUsernameFromOAuth2User(OAuth2User oAuth2User,String registrationId,String providerId){
-        String email=oAuth2User.getAttribute("email");
-        if(email!=null&& !email.isBlank()){
-            return email;
+//        String email=oAuth2User.getAttribute("email");
+        String userName=oAuth2User.getAttribute("name");
+        if(userName!=null&& !userName.isBlank()){
+            return userName;
         }
         return switch (registrationId.toLowerCase()){
             case "google"->oAuth2User.getAttribute("sub");

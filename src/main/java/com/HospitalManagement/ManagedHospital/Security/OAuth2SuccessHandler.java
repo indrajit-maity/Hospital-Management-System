@@ -28,12 +28,13 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         System.out.println(request.getCookies());
+        System.out.println("Indrajit maity");
         OAuth2AuthenticationToken token= (OAuth2AuthenticationToken) authentication;
         OAuth2User oAuth2User=(OAuth2User) authentication.getPrincipal();
         String registrationId= token.getAuthorizedClientRegistrationId();
-//        ResponseEntity<LoginResponseDto> loginResponse=authService.handleOAuth2LoginRequest(oAuth2User,registrationId);
-//        response.setStatus(loginResponse.getStatusCode().value());
-//        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-//        response.getWriter().write(objectMapper.writeValueAsString(loginResponse.getBody()));
+        ResponseEntity<LoginResponseDto> loginResponse=authService.handleOAuth2LoginRequest(oAuth2User,registrationId);
+        response.setStatus(loginResponse.getStatusCode().value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write(objectMapper.writeValueAsString(loginResponse.getBody()));
     }
 }

@@ -1,13 +1,11 @@
 package com.HospitalManagement.ManagedHospital.Security;
 
 
-import com.HospitalManagement.ManagedHospital.dto.LoginRequestDto;
-import com.HospitalManagement.ManagedHospital.dto.LoginResponseDto;
-import com.HospitalManagement.ManagedHospital.dto.SignupRequestDto;
-import com.HospitalManagement.ManagedHospital.dto.SignupResponseDto;
+import com.HospitalManagement.ManagedHospital.dto.*;
 import com.HospitalManagement.ManagedHospital.entity.User;
 import com.HospitalManagement.ManagedHospital.entity.type.AuthProviderType;
 import com.HospitalManagement.ManagedHospital.repositry.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -52,22 +50,39 @@ public class AuthService {
                 .username(signupRequestDto.getUsername())
                 .email(signupRequestDto.getEmail())
                 .password( passwordEncoder.encode(signupRequestDto.getPassword()))
+                .providerId(null)
+                .providerType(AuthProviderType.EMAIL)
+                .build()
+        );
+        return modelMapper.map(user,SignupResponseDto.class);
+    }
+    public SignupResponseDto OauthsignUp(Oauth2dto oauth2dto){
+        User user=userRepository.findByEmail(oauth2dto.getEmail()).orElse(null);
+        if(user!=null) throw new IllegalArgumentException("User already exits.");
+        user=userRepository.save(User.builder()
+                .username(oauth2dto.getUsername())
+                .email(oauth2dto.getEmail())
+                .password(oauth2dto.getPassword())
+                .providerId(oauth2dto.getProviderId())
+                .providerType(oauth2dto.getAuthProviderType())
                 .build()
         );
         return modelMapper.map(user,SignupResponseDto.class);
     }
 
 
-
-
+@Transactional
     public ResponseEntity<LoginResponseDto> handleOAuth2LoginRequest(OAuth2User oAuth2User, String registrationId) {
         //fetch provider type and provider id to identify platform(google,github,.......)
 
 
         AuthProviderType authProviderType=authUtil.getProviderTypeFromRegistrationId(registrationId);
         String providerId= authUtil.determineProviderIdFromOAuth2User(oAuth2User,registrationId);
-        Optional<User> userObj=userRepository.findByProviderIdAndProviderType(providerId,authProviderType);
-        User user=userObj.get();
+//        Optional<User> userObj=userRepository.findByProviderIdAndProviderType(providerId,authProviderType);
+        User user=userRepository.findByProviderIdAndProviderType(providerId,authProviderType).orElse(null);
+//        System.out.println(user.getUsername());
+//        System.out.println(user.getEmail());
+//        System.out.println(user.getProviderType());
         String email=oAuth2User.getAttribute("email");
         User emailUser=userRepository.findByEmail(email).orElse(null);
 
@@ -75,11 +90,13 @@ public class AuthService {
             //Signup flow
             String userName= authUtil.determineUsernameFromOAuth2User(oAuth2User,registrationId,providerId);
 //            String email=authUtil.determineEmailFromOAuth2User(oAuth2User,registrationId,providerId);
-            SignupResponseDto signupResponseDto=signUp(new SignupRequestDto(userName,null,email));
+            SignupResponseDto signupResponseDto=OauthsignUp(new Oauth2dto(userName,email,null,authProviderType,providerId));
+            user=userRepository.findByProviderIdAndProviderType(providerId,authProviderType).orElse(null);
         }
         else if(user!=null){
-            if(email!=null && !email.isBlank() && email.equals(user.getUsername())){
-                user.setUsername(email);
+            if(email!=null && !email.isBlank() && !email.equals(user.getEmail())){
+//                user.setUsername(user.getUsername());
+                user.setEmail(email);
 //                user u=user.get();
                 userRepository.save(user);
             }

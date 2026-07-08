@@ -30,13 +30,13 @@ public class User implements UserDetails {
     @Column(name = "id")
     private Long id;
 
-    @Column(unique = true,nullable = false)
+    @Column(unique = false,nullable = false)
     private String username;//here we can store email,may be any id  or name
-    @Column(unique = true,nullable = false)
+    @Column(unique = false,nullable = false)
     private String email;
     private String password;
 
-    @Column(name="providerid")
+    @Column(name="providerid",unique = false,nullable = false)
     private String providerId;
 
     @Enumerated(EnumType.STRING)
