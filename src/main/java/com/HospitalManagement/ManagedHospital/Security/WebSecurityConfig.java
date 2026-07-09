@@ -8,8 +8,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -18,17 +21,21 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
+//@EnableWebSecurity
+@EnableMethodSecurity
 public class WebSecurityConfig {
 
     private final PasswordEncoder passwordEncoder;
     private  final JwtAuthFilter jwtAuthFilter;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private  final HandlerExceptionResolver handlerExceptionResolver;
 
     private static final String[] SWAGGER_WHITELIST = {
             "/swagger-ui/**",
@@ -55,11 +62,21 @@ public class WebSecurityConfig {
                 .oauth2Login(oauth2->oauth2
                         .failureHandler(
                         (request, response, exception) -> {
-                            log.error("OAuth2 error: {}",exception.getMessage());
+                            System.out.println("failed to login");
+                            log.error("OAuth2 error: {}", exception.getMessage());
+//                            System.out.println("failed to login");
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            response.getWriter().write("{\"error\":\"" + exception.getMessage() + "\"}");
+                            handlerExceptionResolver.resolveException(request,response,null,exception);
                         })
                         .successHandler(oAuth2SuccessHandler)
-//                        .defaultSuccessUrl("/swagger-ui.html",true)
-                );
+                        .defaultSuccessUrl("/swagger-ui.html",true)
+                )
+                .exceptionHandling(exceptionHandlingConfigurer->
+                        exceptionHandlingConfigurer.accessDeniedHandler((request, response, accessDeniedException) -> {
+                            handlerExceptionResolver.resolveException(request,response,null,accessDeniedException);
+                }));
 
         return httpSecurity.build();
     }

@@ -71,26 +71,36 @@ public class AuthService {
     }
 
 
+    public String generateUniqueUsername(String baseName) {
+        String base = baseName.toLowerCase().replaceAll("\\s+", "");
+        String candidate = base;
+        int suffix = 1;
+        while (userRepository.existsByUsername(candidate)) {
+            candidate = base + suffix;
+            suffix++;
+        }
+        return candidate;
+    }
+
+
 @Transactional
     public ResponseEntity<LoginResponseDto> handleOAuth2LoginRequest(OAuth2User oAuth2User, String registrationId) {
         //fetch provider type and provider id to identify platform(google,github,.......)
 
-
+        System.out.println(registrationId.toLowerCase());
         AuthProviderType authProviderType=authUtil.getProviderTypeFromRegistrationId(registrationId);
         String providerId= authUtil.determineProviderIdFromOAuth2User(oAuth2User,registrationId);
 //        Optional<User> userObj=userRepository.findByProviderIdAndProviderType(providerId,authProviderType);
         User user=userRepository.findByProviderIdAndProviderType(providerId,authProviderType).orElse(null);
-//        System.out.println(user.getUsername());
-//        System.out.println(user.getEmail());
-//        System.out.println(user.getProviderType());
         String email=oAuth2User.getAttribute("email");
         User emailUser=userRepository.findByEmail(email).orElse(null);
 
         if(user==null && emailUser==null){
             //Signup flow
             String userName= authUtil.determineUsernameFromOAuth2User(oAuth2User,registrationId,providerId);
+            String uniqueUsername=generateUniqueUsername(userName);
 //            String email=authUtil.determineEmailFromOAuth2User(oAuth2User,registrationId,providerId);
-            SignupResponseDto signupResponseDto=OauthsignUp(new Oauth2dto(userName,email,null,authProviderType,providerId));
+            SignupResponseDto signupResponseDto=OauthsignUp(new Oauth2dto(uniqueUsername,email,null,authProviderType,providerId));
             user=userRepository.findByProviderIdAndProviderType(providerId,authProviderType).orElse(null);
         }
         else if(user!=null){
@@ -102,7 +112,7 @@ public class AuthService {
             }
         }
         else{
-            throw new BadCredentialsException("This email is already register with provider:"+email);
+            throw new BadCredentialsException("This email is already register with provider:"+emailUser.getProviderType());
         }
 //        save the provider id and provider type(if client login from multiple platform to prevent this)
 //        if the user has an account directly login

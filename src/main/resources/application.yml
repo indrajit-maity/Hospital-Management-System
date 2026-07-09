@@ -9,7 +9,7 @@ spring:
             client-id: ${Google_Client_ID}
             client-secret: ${Google_client_Secret}
           github:
-            client-id: enfefnnshioe
-            client-secret: jrnfjernfj
+            client-id: ${GitHub_Client_ID}
+            client-secret: ${GitHub_Client_Secret}
 
 
