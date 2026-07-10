@@ -6,17 +6,17 @@ spring:
       client:
         registration:
           google:
-<<<<<<< HEAD
+#<<<<<<< HEAD
             client-id: ${Google_Client_ID}
             client-secret: ${Google_client_Secret}
           github:
             client-id: ${GitHub_Client_ID}
             client-secret: ${GitHub_Client_Secret}
 
-=======
-            client-id: ${Google_Client_ID}
-            client-secret: ${Google_client_Secret}
-          github:
-            client-id: enfefnnshioe
-            client-secret: jrnfjernfj
->>>>>>> a9a70d7 (feat(security): implement OAuth2 authentication)
+#=======
+#            client-id: ${Google_Client_ID}
+#            client-secret: ${Google_client_Secret}
+#          github:
+#            client-id: enfefnnshioe
+#            client-secret: jrnfjernfj
+#>>>>>>> a9a70d7 (feat(security): implement OAuth2 authentication)
