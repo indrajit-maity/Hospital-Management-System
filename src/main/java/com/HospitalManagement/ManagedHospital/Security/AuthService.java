@@ -2,8 +2,17 @@ package com.HospitalManagement.ManagedHospital.Security;
 
 
 import com.HospitalManagement.ManagedHospital.dto.*;
+import com.HospitalManagement.ManagedHospital.entity.Admin;
+import com.HospitalManagement.ManagedHospital.entity.Doctor;
+import com.HospitalManagement.ManagedHospital.entity.Patient;
 import com.HospitalManagement.ManagedHospital.entity.User;
 import com.HospitalManagement.ManagedHospital.entity.type.AuthProviderType;
+//import com.HospitalManagement.ManagedHospital.entity.type.RoleType;
+import com.HospitalManagement.ManagedHospital.entity.type.BloodGroupType;
+import com.HospitalManagement.ManagedHospital.entity.type.RoleType;
+import com.HospitalManagement.ManagedHospital.repositry.AdminRepositry;
+import com.HospitalManagement.ManagedHospital.repositry.DoctorRepository;
+import com.HospitalManagement.ManagedHospital.repositry.PatientRepositry;
 import com.HospitalManagement.ManagedHospital.repositry.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +27,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Optional;
+import java.util.Set;
+
+
 
 @Slf4j
 @Service
@@ -30,6 +43,9 @@ public class AuthService {
     private final AuthUtil authUtil;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
+    private final PatientRepositry patientRepositry;
+    private final DoctorRepository doctorRepository;
+    private final AdminRepositry adminRepositry;
 
     public LoginResponseDto login(LoginRequestDto loginRequestDto) {
         System.out.println("hiii");
@@ -44,27 +60,97 @@ public class AuthService {
 
     public SignupResponseDto signUp(SignupRequestDto signupRequestDto) {
 //        User user=userRepository.findByUsername(signupRequestDto.getUsername()).orElse(null);
+//        System.out.println(signupRequestDto.getUsername());
         User user=userRepository.findByEmail(signupRequestDto.getEmail()).orElse(null);
         if(user!=null) throw new IllegalArgumentException("User already exits");
-        user =userRepository.save(User.builder()
-                .username(signupRequestDto.getUsername())
-                .email(signupRequestDto.getEmail())
-                .password( passwordEncoder.encode(signupRequestDto.getPassword()))
-                .providerId(null)
-                .providerType(AuthProviderType.EMAIL)
-                .build()
-        );
+//        System.out.println(signupRequestDto.getUsername());
+
+        try {
+
+            user = userRepository.save(
+                    User.builder()
+                            .username(signupRequestDto.getUsername())
+                            .email(signupRequestDto.getEmail())
+                            .password(passwordEncoder.encode(signupRequestDto.getPassword()))
+                            .providerId(null)
+                            .providerType(AuthProviderType.EMAIL)
+                            .roles(Set.of(signupRequestDto.getRoles().toArray(new RoleType[0])))
+                            .build());
+
+            if(signupRequestDto.getRoles().equals(Set.of(RoleType.PATIENT))){
+                Patient patient=patientRepositry.save(
+                        Patient.builder()
+                                .name(signupRequestDto.getUsername())
+                                .email(signupRequestDto.getEmail())
+                                .bloodGroup(BloodGroupType.O_POSITIVE)
+                                .disease("fever")
+                                .user(user)
+                                .birthdate(LocalDate.of(2005,01,18))
+                                .build()
+                );
+            }
+            if(signupRequestDto.getRoles().equals(Set.of(RoleType.DOCTOR))){
+                Doctor doctor=doctorRepository.save(
+                        Doctor.builder()
+                                .email(signupRequestDto.getEmail())
+                                .name(signupRequestDto.getUsername())
+                                .user(user)
+                                .specalization("Migrane_Specalist")
+                                .build()
+                );
+            }
+            if(signupRequestDto.getRoles().equals(Set.of(RoleType.ADMIN))){
+                Admin admin=adminRepositry.save(
+                        Admin.builder()
+                                .email(signupRequestDto.getEmail())
+                                .name(signupRequestDto.getUsername())
+                                .user(user)
+                                .build()
+                );
+            }
+
+            System.out.println("Saved Successfully");
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        }
+//        System.out.println(signupRequestDto.getUsername());
+//       if(signupRequestDto.getRoles().equals(Set.of(RoleType.PATIENT))){
+//           Patient patient=patientRepositry.save(
+//                   Patient.builder()
+//                           .name(signupRequestDto.getUsername())
+//                           .email(signupRequestDto.getEmail())
+//                           .bloodGroup(BloodGroupType.O_POSITIVE)
+//                           .disease("fever")
+//                           .birthdate(LocalDate.of(2005,01,18))
+//                           .build()
+//           );
+//       }
+//       if(signupRequestDto.getRoles().equals(Set.of(RoleType.DOCTOR))){
+//           Doctor doctor=doctorRepository.save(
+//                   Doctor.builder()
+//                           .email(signupRequestDto.getEmail())
+//                           .name(signupRequestDto.getUsername())
+//                           .specalization("Migrane_Specalist")
+//                           .build()
+//           );
+//       }
+
         return modelMapper.map(user,SignupResponseDto.class);
     }
     public SignupResponseDto OauthsignUp(Oauth2dto oauth2dto){
         User user=userRepository.findByEmail(oauth2dto.getEmail()).orElse(null);
         if(user!=null) throw new IllegalArgumentException("User already exits.");
+        System.out.println(oauth2dto.getUsername()+10);
         user=userRepository.save(User.builder()
                 .username(oauth2dto.getUsername())
                 .email(oauth2dto.getEmail())
                 .password(oauth2dto.getPassword())
                 .providerId(oauth2dto.getProviderId())
                 .providerType(oauth2dto.getAuthProviderType())
+                .roles(Set.of(RoleType.PATIENT))
                 .build()
         );
         return modelMapper.map(user,SignupResponseDto.class);

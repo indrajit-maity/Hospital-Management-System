@@ -38,11 +38,11 @@ public class Doctor {
     private String email;
 
     @OneToMany(mappedBy = "doctor")
-    @Builder.Default
+//    @Builder.Default
     private List<Appointment> appointments=new ArrayList<>();
 
     @ManyToMany(mappedBy = "doctors")
-   @Builder.Default
+//   @Builder.Default
     private Set<Department> departments=new HashSet<>();
 
 //    @OneToMany(mappedBy = "doctor")

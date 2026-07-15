@@ -4,6 +4,7 @@ package com.HospitalManagement.ManagedHospital.service;
 import com.HospitalManagement.ManagedHospital.dto.PatientDto;
 import com.HospitalManagement.ManagedHospital.dto.PatientResponseDto;
 import com.HospitalManagement.ManagedHospital.entity.Patient;
+import com.HospitalManagement.ManagedHospital.entity.User;
 import com.HospitalManagement.ManagedHospital.repositry.PatientRepositry;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -27,15 +28,24 @@ public class PatientService {
 
     @Transactional
     public PatientDto createnewPatient(PatientDto patientDto) {
-        System.out.println("Before Save");
-        Patient newpatient=modelMapper.map(patientDto,Patient.class);
-        Patient patient=patientRepositry.save(newpatient);
-        System.out.println("After Save: "+patient.getId());
-        return modelMapper.map(patient,PatientDto.class);
+        try {
+            System.out.println("Before Save");
+            User user=new User();
+
+            Patient newpatient = modelMapper.map(patientDto, Patient.class);
+            Patient patient = patientRepositry.save(newpatient);
+            System.out.println("After Save: " + patient.getId());
+            return modelMapper.map(patient, PatientDto.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     public  List<Patient> getallpatient() {
+        System.out.println("all students in patinet service:");
         List<Patient> patients=patientRepositry.findAll();
+        System.out.println("Students are: ");
         return patients.stream().toList();
     }
 //in admin controller

@@ -11,7 +11,8 @@ public enum PermissionType {
     PATIENT_WRITE("patient:write"),
     APPOINTMENT_READ("appointment:read"),
     APPOINTMENT_WRITE("appointment:write"),
-    USER_Manage("user:manage"),
+    APPOINTMENT_DELETE("appointment:delete"),
+    USER_MANAGE("user:manage"),
     REPORT_VIEW("report:view");
     private final String permission;
 }

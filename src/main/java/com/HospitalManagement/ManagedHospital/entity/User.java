@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -30,13 +31,13 @@ public class User implements UserDetails {
     @Column(name = "id")
     private Long id;
 
-    @Column(unique = false,nullable = false)
+    @Column(unique = true,nullable = false)
     private String username;//here we can store email,may be any id  or name
-    @Column(unique = false,nullable = false)
+    @Column(unique = true,nullable = false)
     private String email;
     private String password;
 
-    @Column(name="providerid",unique = false,nullable = false)
+    @Column(name="providerid",nullable = true)
     private String providerId;
 
     @Enumerated(EnumType.STRING)
@@ -44,7 +45,6 @@ public class User implements UserDetails {
     private AuthProviderType providerType;
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
-            @Builder.Default
     Set<RoleType> roles=new HashSet<>();
 
 
@@ -72,6 +72,15 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities(){
-        return  List.of();
+        Set<SimpleGrantedAuthority> authorities = new HashSet<>();
+        roles.forEach(
+                role -> {
+                    Set<SimpleGrantedAuthority> permissions = RolePermissionMapping.getAuthoritiesForRole(role);
+                    authorities.addAll(permissions);
+                    authorities.add(new SimpleGrantedAuthority("ROLE_"+role.name()));
+                }
+        );
+        return authorities;
     }
 }
+

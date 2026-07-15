@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/hospital")
+@RequestMapping("/public")
 @Tag(name="hospital Management",description = "Opertion related to hospital contoller")
 public class HospitalController {
 

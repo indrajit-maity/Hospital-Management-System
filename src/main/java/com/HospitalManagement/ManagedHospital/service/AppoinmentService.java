@@ -11,7 +11,12 @@ import com.HospitalManagement.ManagedHospital.repositry.PatientRepositry;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +27,7 @@ public class AppoinmentService {
     private final ModelMapper modelMapper;
 
     @Transactional
+    @PreAuthorize("hasRole('ADMIN') or hasRole('DOCTOR') or hasRole('PATIENT')")
     public AppointmentResponcedto createnewAppointment(CreateAppointmentRequestDto createAppointmentRequestDto){
         Long doctorId= createAppointmentRequestDto.getDoctor_id();
         Long patientId= createAppointmentRequestDto.getPatient_id();
@@ -45,5 +51,14 @@ public class AppoinmentService {
         appointment.setDoctor(doctor);
         doctor.getAppointments().add(appointment);
         return appointment;
+    }
+//    @Transactional
+@PreAuthorize("hasRole('ADMIN') or hasRole('DOCTOR') or #doctorId == authentication.principal.id")
+public List<AppointmentResponcedto> getAllAppointmentsofDoctor(Long doctorId) {
+        Doctor doctor=doctorRepository.findById(doctorId).orElseThrow();
+        return doctor.getAppointments()
+                .stream()
+                .map(appointment -> modelMapper.map(appointment,AppointmentResponcedto.class))
+                .collect(Collectors.toList());
     }
 }

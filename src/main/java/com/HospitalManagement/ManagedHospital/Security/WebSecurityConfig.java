@@ -1,11 +1,14 @@
 package com.HospitalManagement.ManagedHospital.Security;
 
 
+import com.HospitalManagement.ManagedHospital.entity.type.PermissionType;
+import com.HospitalManagement.ManagedHospital.entity.type.RoleType;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -15,6 +18,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
+
+import static com.HospitalManagement.ManagedHospital.entity.type.PermissionType.*;
 
 @Configuration
 @RequiredArgsConstructor
@@ -46,6 +51,11 @@ public class WebSecurityConfig {
                         .requestMatchers("/admin/home").permitAll()
                         .requestMatchers(SWAGGER_WHITELIST).permitAll()
                         .requestMatchers("/auth/**").permitAll()
+                                .requestMatchers(HttpMethod.DELETE,"/admin/**").hasAnyAuthority(APPOINTMENT_DELETE.name(),USER_MANAGE.name())
+                                .requestMatchers("/public/**").permitAll()
+                                .requestMatchers("/admin/**").hasRole(RoleType.ADMIN.name())
+                                .requestMatchers("/doctor/**").hasAnyRole(RoleType.DOCTOR.name(),RoleType.ADMIN.name())
+                                .requestMatchers("/patient/**").hasAnyRole(RoleType.PATIENT.name(),RoleType.DOCTOR.name(),RoleType.ADMIN.name())
 //                        .requestMatchers("/patient/newPatient").permitAll()
                         .anyRequest().authenticated()
                 )
@@ -62,7 +72,7 @@ public class WebSecurityConfig {
                             handlerExceptionResolver.resolveException(request,response,null,exception);
                         })
                         .successHandler(oAuth2SuccessHandler)
-                        .defaultSuccessUrl("/swagger-ui.html",true)
+//                        .defaultSuccessUrl("/swagger-ui.html",true)
                 )
                 .exceptionHandling(exceptionHandlingConfigurer->
                         exceptionHandlingConfigurer.accessDeniedHandler((request, response, accessDeniedException) -> {

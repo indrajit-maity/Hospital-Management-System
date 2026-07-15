@@ -18,9 +18,15 @@ public class SignupRequestDto {
 //    private String name;
     private String email;
     private Set<RoleType> roles=new HashSet<>();
-    public SignupRequestDto(String username,String password,String email){
+    public SignupRequestDto(String username,String password,String email,Set<RoleType> roles){
         this.username=username;
         this.password=password;
         this.email=email;
+        this.roles=roles;
+    }
+
+
+    public String getPassword() {
+        return password;
     }
 }

@@ -42,6 +42,10 @@ public class Patient {
     @Enumerated(EnumType.STRING)
     private BloodGroupType bloodGroup;
 
+    @OneToOne
+    @MapsId
+    private User user;
+
     @OneToOne(cascade = {CascadeType.ALL},orphanRemoval = true)//owning side
     @JoinColumn(name = "patient_insurance_id")
     private Insurance insurance;

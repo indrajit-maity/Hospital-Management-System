@@ -4,6 +4,7 @@ import com.HospitalManagement.ManagedHospital.dto.AppointmentResponcedto;
 import com.HospitalManagement.ManagedHospital.dto.CreateAppointmentRequestDto;
 import com.HospitalManagement.ManagedHospital.dto.PatientDto;
 import com.HospitalManagement.ManagedHospital.entity.Patient;
+import com.HospitalManagement.ManagedHospital.entity.User;
 import com.HospitalManagement.ManagedHospital.service.AppoinmentService;
 import com.HospitalManagement.ManagedHospital.service.PatientService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,6 +30,7 @@ public class PatientControler {
     @Operation(summary = "Get all patient")
     @GetMapping("/all")
     public ResponseEntity<List<Patient>> getAllpatient(){
+        System.out.println("All Patient :");
         return ResponseEntity.status(HttpStatus.CREATED).body(patientService.getallpatient());
     }
 @Operation(summary = "Get patient through id")
