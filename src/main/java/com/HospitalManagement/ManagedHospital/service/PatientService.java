@@ -42,14 +42,14 @@ public class PatientService {
         }
     }
 
-    public  List<Patient> getallpatient() {
-        System.out.println("all students in patinet service:");
-        List<Patient> patients=patientRepositry.findAll();
-        System.out.println("Students are: ");
-        return patients.stream().toList();
-    }
+//    public  List<PatientDto> getallpatient() {
+//        System.out.println("all students in patinet service:");
+//        List<Patient> patients=patientRepositry.findAll();
+//        System.out.println("Students are: ");
+//        return patients.stream().toList();
+//    }
 //in admin controller
-    public List<PatientResponseDto> getAllpatient(Integer pageNumber, Integer pageSize) {
+    public List<PatientResponseDto> getallpatient(Integer pageNumber, Integer pageSize) {
         return patientRepositry.findAllPatients(PageRequest.of(pageNumber,pageSize))
                 .stream()
                 .map(patient -> modelMapper.map(patient,PatientResponseDto.class))

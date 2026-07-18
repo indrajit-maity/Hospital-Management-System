@@ -2,7 +2,7 @@
 
 # 🏥 Hospital Management System
 
-### Enterprise-Grade Hospital Management Backend Powered by Spring Boot
+### Enterprise-Grade Hospital Management Backend Using by Spring Boot
 
 *A production-ready, secure, and scalable RESTful backend for managing hospital operations — patients, doctors, appointments, and medical records — built with modern Java engineering practices.*
 
@@ -52,7 +52,6 @@
 - [Database Migration](#-database-migration)
 - [Security](#-security)
 - [Error Handling](#-error-handling)
-- [Deployment](#-deployment)
 - [Future Enhancements](#-future-enhancements)
 - [Contribution Guide](#-contribution-guide)
 - [License](#-license)
@@ -649,18 +648,11 @@ Contributions are welcome! To contribute:
 Please ensure all new code is covered by unit tests and follows existing code style conventions.
 
 ---
-
-## 📄 License
-
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
-
----
-
 ## 👤 Author
 
 <div align="center">
 
-**Your Name**
+**Indrajit Maity**
 
 [![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/<your-username>)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/<your-profile>)

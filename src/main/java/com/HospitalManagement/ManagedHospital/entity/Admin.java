@@ -19,6 +19,8 @@ public class Admin {
     private  String name;
     @Column(nullable = false,unique = true)
     private String email;
+    @Column(name = "phone_no", length = 20)
+    private String phoneNo;
     @OneToOne
     @MapsId
     private User user;

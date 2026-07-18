@@ -1,0 +1,30 @@
+services:
+  mysql:
+    image: mysql:latest
+    container_name: hospital-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: Indra@4321
+      MYSQL_DATABASE: Hospital
+    ports:
+      - "3307:3306"
+    networks:
+      - hospital-network
+
+  hospital-app:
+    build: .
+    container_name: hospital-spring
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: ${DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "8080:8080"
+    networks:
+      - hospital-network
+
+networks:
+    hospital-network:
+        driver: bridge

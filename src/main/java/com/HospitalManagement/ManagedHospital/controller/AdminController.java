@@ -35,7 +35,7 @@ public class AdminController {
             @RequestParam(value = "page",defaultValue = "0") Integer pageNumber,
             @RequestParam(value="size",defaultValue = "10") Integer pageSize
     ){
-            return ResponseEntity.status(HttpStatus.CREATED).body(patientService.getAllpatient(pageNumber,pageSize));
+            return ResponseEntity.status(HttpStatus.CREATED).body(patientService.getallpatient(pageNumber,pageSize));
     }
 
     @Operation(summary = "Add new Doctor")

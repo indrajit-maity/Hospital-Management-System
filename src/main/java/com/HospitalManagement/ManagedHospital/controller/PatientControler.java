@@ -3,6 +3,7 @@ package com.HospitalManagement.ManagedHospital.controller;
 import com.HospitalManagement.ManagedHospital.dto.AppointmentResponcedto;
 import com.HospitalManagement.ManagedHospital.dto.CreateAppointmentRequestDto;
 import com.HospitalManagement.ManagedHospital.dto.PatientDto;
+import com.HospitalManagement.ManagedHospital.dto.PatientResponseDto;
 import com.HospitalManagement.ManagedHospital.entity.Patient;
 import com.HospitalManagement.ManagedHospital.entity.User;
 import com.HospitalManagement.ManagedHospital.service.AppoinmentService;
@@ -29,9 +30,10 @@ public class PatientControler {
 
     @Operation(summary = "Get all patient")
     @GetMapping("/all")
-    public ResponseEntity<List<Patient>> getAllpatient(){
+    public ResponseEntity<List<PatientResponseDto>> getAllpatient(@RequestParam(value = "page",defaultValue = "0") Integer pageNumber,
+                                                                  @RequestParam(value="size",defaultValue = "5") Integer size){
         System.out.println("All Patient :");
-        return ResponseEntity.status(HttpStatus.CREATED).body(patientService.getallpatient());
+        return ResponseEntity.status(HttpStatus.CREATED).body(patientService.getallpatient(pageNumber,size));
     }
 @Operation(summary = "Get patient through id")
     @GetMapping("/{id}")
