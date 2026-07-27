@@ -38,7 +38,6 @@
 - [Key Features](#-key-features)
     - [Authentication & Security](#-authentication--security)
     - [Authorization](#-authorization)
-    - [Roles](#-roles)
     - [Hospital Features](#-hospital-features)
     - [Database](#-database)
     - [Docker](#-docker)
@@ -52,100 +51,54 @@
 - [Database Migration](#-database-migration)
 - [Security](#-security)
 - [Error Handling](#-error-handling)
-- [Future Enhancements](#-future-enhancements)
-- [Contribution Guide](#-contribution-guide)
-- [License](#-license)
 - [Author](#-author)
 
 ---
 
 ## 🩺 Overview
 
-The **Hospital Management System (HMS)** is a production-ready backend application designed to digitize and streamline core hospital operations. It provides a secure, role-driven platform for managing **patients, doctors, appointments, medical records, and administrative workflows** through a clean, well-documented RESTful API.
+The **Hospital Management System** is a production-ready backend application built with **Spring Boot**, designed to simplify and streamline healthcare management through secure and scalable RESTful APIs.
 
-Built with **Spring Boot** and following **layered (N-tier) architecture** principles, the system emphasizes:
+The system provides comprehensive modules for managing **patients**, **doctors**, **appointments**, and **medical records**, enabling efficient hospital operations with a clean and well-structured architecture.
 
-- 🔐 **Security-first design** — JWT-based stateless authentication with fine-grained, role-and-permission-based authorization.
-- 🧱 **Clean architecture** — Clear separation of concerns across Controller, Service, and Repository layers.
-- 🐳 **Portability** — Fully containerized with Docker for consistent deployment across environments.
-- 🗃️ **Reliable data management** — MySQL with Flyway-managed, version-controlled schema migrations.
-
-This project exists to serve as both a **real-world reference implementation** of enterprise Spring Boot practices and a **functional foundation** for hospitals or clinics seeking a digital patient-and-appointment management solution.
+To ensure enterprise-grade security, the application implements **Spring Security**, **JWT-based authentication**,**OAuth2 Authentication using Google and GitHub**, **Role-Based Access Control (RBAC)**, and **permission-based authorization**, providing fine-grained access control for different user roles.
 
 ---
 
 ## ✨ Key Features
+## 🔐 Authentication & Authorization Flow
 
-### 🔑 Authentication & Security
+```mermaid
+flowchart LR
 
-| Feature | Description |
-|---|---|
-| **JWT Authentication** | Stateless, token-based authentication using signed JSON Web Tokens, eliminating server-side session storage. |
-| **Refresh Token Support** | Long-lived refresh tokens allow clients to obtain new access tokens without re-authenticating, improving UX while keeping access tokens short-lived and secure. |
-| **Spring Security Integration** | Deep integration with the Spring Security filter chain for request-level authentication and authorization enforcement. |
-| **Password Encryption (BCrypt)** | All user passwords are hashed using the BCrypt adaptive hashing algorithm before persistence — plaintext passwords are never stored. |
-| **Stateless Authentication** | No server-side session state; each request is authenticated independently via the JWT, enabling horizontal scalability. |
+A[Client] -->|Login Request| B[Authentication]
+B --> C{Valid Credentials?}
 
-### 🛡️ Authorization
+C -- No --> D[401 Unauthorized]
 
-| Feature | Description |
-|---|---|
-| **Role-Based Authentication** | Users authenticate with credentials tied to a specific role (Admin, Doctor, Patient). |
-| **Role-Based Authorization (RBAC)** | API access is restricted based on the authenticated user's assigned role. |
-| **Authority-Based Authorization** | Fine-grained `GrantedAuthority` checks complement role checks for granular endpoint protection. |
-| **Fine-Grained Permission Management** | Individual permissions (e.g., `PATIENT_READ`, `APPOINTMENT_WRITE`) can be assigned independently of roles. |
-| **Dynamic Permission Assignment** | Administrators can assign or revoke permissions to users at runtime without redeploying the application. |
-| **Permission Mapping** | Permissions are mapped to roles and/or individual users through a dedicated mapping layer. |
-| **User-Specific Permissions** | Supports overriding default role permissions on a per-user basis for exceptional access cases. |
-| **Custom Security Configuration** | A tailored `SecurityFilterChain` defines public, authenticated, and role-restricted endpoints explicitly. |
-| **Method-Level Security** | `@PreAuthorize` / `@Secured` annotations enforce authorization directly at the service and controller method level. |
-| **Secure API Access** | All sensitive endpoints require a valid JWT and appropriate authority, validated on every request. |
+C -- Yes --> E[Generate JWT & Refresh Token]
+E --> F[Return JWT to Client]
 
-### 👥 Roles
+F --> G[Client Sends JWT]
+G --> H[JWT Authentication Filter]
 
-The system defines three core roles, each with a distinct set of responsibilities and permissions.
+H --> I{Valid Token?}
 
-<table>
-<tr><th>Role</th><th>Capabilities</th></tr>
-<tr>
-<td><b>🛠️ Admin</b></td>
-<td>
+I -- No --> J[401 Unauthorized]
 
-- Manage users (create, update, deactivate)
-- Assign roles to users
-- Assign and revoke permissions
-- Manage doctor records
-- Manage patient records
-- Manage appointments across the system
-- View system-wide analytics and reports
+I -- Yes --> K[Load User Details]
+K --> L[Check Roles & Permissions]
 
-</td>
-</tr>
-<tr>
-<td><b>👨‍⚕️ Doctor</b></td>
-<td>
+L --> M{Authorized?}
 
-- View assigned patients
-- Manage appointment schedules
-- Update patient medical records
-- Write and manage prescriptions
+M -- No --> N[403 Forbidden]
 
-</td>
-</tr>
-<tr>
-<td><b>🧑‍🤝‍🧑 Patient</b></td>
-<td>
-
-- Register and log in to the platform
-- Book new appointments
-- View appointment history
-- Update personal profile information
-- View issued prescriptions
-
-</td>
-</tr>
-</table>
-
+M -- Yes --> O[Controller]
+O --> P[Service]
+P --> Q[Repository]
+Q --> R[(MySQL Database)]
+R --> S[Return Response]
+```
 ### 🏥 Hospital Features
 
 - **Patient Management** — Full CRUD operations for patient profiles, demographics, and medical history.
@@ -156,79 +109,117 @@ The system defines three core roles, each with a distinct set of responsibilitie
 - **Role Management** — Creation and configuration of roles within the system.
 - **Permission Management** — Granular control over what each role or user is allowed to do.
 
-### 🗄️ Database
+## 🗄️ Database Schema Design
 
-- **MySQL Integration** — Relational data persistence via Spring Data JPA and Hibernate.
-- **Flyway Migration** — Version-controlled, repeatable schema migrations applied automatically on startup.
-- **Database Versioning** — Every schema change is tracked as an immutable, incrementally versioned SQL script.
-- **Automatic Schema Migration** — No manual DDL execution required; Flyway applies pending migrations on application boot.
+The Hospital Management System follows a **relational database design** to maintain data integrity and efficiently manage relationships between different entities. The schema is normalized to reduce redundancy while ensuring scalability and maintainability.
 
-### 🐳 Docker
+```mermaid
+erDiagram
 
-- **Dockerized Spring Boot Application** — The backend is packaged into a lightweight, portable container image.
-- **Dockerized MySQL** — The database runs as an isolated, reproducible container.
-- **Docker Network** — A dedicated bridge network enables secure, isolated communication between containers.
-- **Container Communication** — The application container resolves the database container by service name over the internal Docker network.
+    PATIENT {
+        bigint id PK
+        string name
+        string gender
+        date birthDate
+        string email
+        string bloodGroup
+        datetime createdAt
+        bigint insurance_id FK
+    }
 
----
+    DOCTOR {
+        bigint id PK
+        string name
+        string specialization
+        string email
+        datetime createdAt
+    }
+
+    APPOINTMENT {
+        bigint id PK
+        datetime appointmentTime
+        string reason
+        string status
+        bigint doctor_id FK
+        bigint patient_id FK
+    }
+
+    INSURANCE {
+        bigint id PK
+        string policyNumber
+        string provider
+        date validUntil
+        datetime createdAt
+    }
+
+    DEPARTMENT {
+        bigint id PK
+        string name
+        datetime createdAt
+        bigint head_doctor_id FK
+    }
+
+    DOCTOR_DEPARTMENT {
+        bigint doctor_id PK,FK
+        bigint department_id PK,FK
+    }
+
+    PATIENT ||--o{ APPOINTMENT : books
+    DOCTOR ||--o{ APPOINTMENT : handles
+
+    INSURANCE ||--o{ PATIENT : has
+
+    DOCTOR }o--o{ DEPARTMENT : assigned_to
+
+    DOCTOR ||--o| DEPARTMENT : head_of
+
+    DOCTOR ||--o{ DOCTOR_DEPARTMENT : belongs
+    DEPARTMENT ||--o{ DOCTOR_DEPARTMENT : contains
+```
 
 ## 🏗️ Architecture
 
 The application follows a classic **layered (N-tier) architecture**, ensuring clear separation of concerns, testability, and maintainability.
 
-### Application Layer Flow
+### 🏗️ Application Layer Flow
 
-```
-┌────────────┐
-│   Client    │  (Web / Mobile / Postman)
-└─────┬──────┘
-      │  HTTPS Request
-      ▼
-┌─────────────────────┐
-│    Spring Boot        │
-│   (Embedded Tomcat)    │
-└─────┬────────────────┘
-      ▼
-┌─────────────┐
-│  Controller  │  → Handles HTTP requests, validates input, returns responses
-└─────┬───────┘
-      ▼
-┌─────────────┐
-│   Service    │  → Business logic, transaction management
-└─────┬───────┘
-      ▼
-┌─────────────┐
-│ Repository   │  → Data access via Spring Data JPA
-└─────┬───────┘
-      ▼
-┌─────────────┐
-│    MySQL     │  → Persistent relational storage
-└─────────────┘
-```
+```mermaid
+flowchart TD
 
-### 🔐 Security Flow
+    A[🌐 Client]
+    -->|📨 HTTPS Request| B[🚀 Embedded Tomcat]
 
-```
-┌────────────┐
-│   Client    │
-└─────┬──────┘
-      │  Request + JWT (Authorization Header)
-      ▼
-┌─────────────────────┐
-│     JWT Filter        │  → Extracts & validates the token
-└─────┬────────────────┘
-      ▼
-┌───────────────────────────┐
-│  Authentication Manager     │  → Authenticates the extracted credentials
-└─────┬─────────────────────┘
-      ▼
-┌────────────────────┐
-│  Security Context    │  → Stores the authenticated principal for the request
-└─────┬───────────────┘
-      ▼
-┌─────────────┐
-│  Controller  │  → Executes the request with enforced authorization
-└─────────────┘
+    B --> C[🔐 Spring Security]
+
+    C --> D[🛡️ JWT Authentication Filter]
+
+    D --> E{✅ Token Valid?}
+
+    E -- ❌ No --> F[🚫 401 Unauthorized]
+
+    E -- ✅ Yes --> G[🎮 Controller]
+
+    G --> H[⚙️ Service Layer]
+
+    H --> I[🗄️ Repository Layer]
+
+    I --> J[(💾 MySQL Database)]
+
+    J --> I
+
+    I --> H
+
+    H --> G
+
+    G --> K[📦 HTTP Response]
+
+    G -. ⚠️ Exception .-> L[🛑 Global Exception Handler]
+
+    L --> M[❗ Error Response]
+
+    M --> A
+
+    K --> A
 ```
 
 Each incoming request passes through the `JwtAuthenticationFilter`, which validates the token signature and expiration, loads the user's authorities, and populates the `SecurityContext` — enabling downstream `@PreAuthorize` checks at the controller and service layers.
@@ -236,60 +227,110 @@ Each incoming request passes through the `JwtAuthenticationFilter`, which valida
 ---
 
 ## 🌳 Project Structure
+## 📂 Project Structure
 
-```
-hospital-management-system/
-├── src/
-│   ├── main/
-│   │   ├── java/
-│   │   │   └── com/hms/
-│   │   │       ├── config/                 # Security, Swagger, and app configuration
-│   │   │       │   ├── SecurityConfig.java
-│   │   │       │   └── OpenApiConfig.java
-│   │   │       ├── controller/             # REST controllers
-│   │   │       │   ├── AuthController.java
-│   │   │       │   ├── PatientController.java
-│   │   │       │   ├── DoctorController.java
-│   │   │       │   └── AppointmentController.java
-│   │   │       ├── service/                # Business logic layer
-│   │   │       │   ├── impl/
-│   │   │       │   ├── AuthService.java
-│   │   │       │   ├── PatientService.java
-│   │   │       │   └── AppointmentService.java
-│   │   │       ├── repository/             # Spring Data JPA repositories
-│   │   │       │   ├── UserRepository.java
-│   │   │       │   ├── PatientRepository.java
-│   │   │       │   └── AppointmentRepository.java
-│   │   │       ├── entity/                 # JPA entities
-│   │   │       │   ├── User.java
-│   │   │       │   ├── Role.java
-│   │   │       │   ├── Permission.java
-│   │   │       │   ├── Patient.java
-│   │   │       │   ├── Doctor.java
-│   │   │       │   └── Appointment.java
-│   │   │       ├── dto/                    # Request/response DTOs
-│   │   │       ├── security/               # JWT filters, providers, utils
-│   │   │       │   ├── JwtAuthenticationFilter.java
-│   │   │       │   ├── JwtService.java
-│   │   │       │   └── UserDetailsServiceImpl.java
-│   │   │       ├── exception/               # Global exception handling
-│   │   │       │   └── GlobalExceptionHandler.java
-│   │   │       └── HospitalManagementApplication.java
-│   │   └── resources/
-│   │       ├── db/migration/               # Flyway migration scripts
-│   │       │   ├── V1__init_schema.sql
-│   │       │   └── V2__seed_roles_permissions.sql
+```text
+Hospital-Management-System
+│
+├── 📦 src
+│   ├── 📂 main
+│   │   ├── 📂 java
+│   │   │   └── 📂 com.HospitalManagement.ManagedHospital
+│   │   │
+│   │   │   ├── 📂 configuration
+│   │   │   │   ├── OpenApiConfig.java
+│   │   │   │   ├── MapperConfiguration.java
+│   │   │   │   └── ...
+│   │   │   │
+│   │   │   ├── 📂 controller
+│   │   │   │   ├── AuthController.java
+│   │   │   │   ├── AdminController.java
+│   │   │   │   ├── DoctorController.java
+│   │   │   │   ├── PatientController.java
+│   │   │   │   ├── HospitalController.java
+│   │   │   │   └── ...
+│   │   │   │
+│   │   │   ├── 📂 dto
+│   │   │   │   ├── request/
+│   │   │   │   ├── response/
+│   │   │   │   ├── auth/
+│   │   │   │   └── ... (All Request & Response DTOs)
+│   │   │   │
+│   │   │   ├── 📂 entity
+│   │   │   │   ├── User.java
+│   │   │   │   ├── Patient.java
+│   │   │   │   ├── Doctor.java
+│   │   │   │   ├── Department.java
+│   │   │   │   ├── Appointment.java
+│   │   │   │   ├── Insurance.java
+│   │   │   │   ├── Admin.java
+│   │   │   │   ├── DoctorDepartment.java
+│   │   │   │   └── ...
+│   │   │   │
+│   │   │   ├── 📂 repository
+│   │   │   │   ├── UserRepository.java
+│   │   │   │   ├── PatientRepository.java
+│   │   │   │   ├── DoctorRepository.java
+│   │   │   │   ├── AppointmentRepository.java
+│   │   │   │   ├── DepartmentRepository.java
+│   │   │   │   ├── InsuranceRepository.java
+│   │   │   │   └── ...
+│   │   │   │
+│   │   │   ├── 📂 service
+│   │   │   │   ├── AuthService.java
+│   │   │   │   ├── PatientService.java
+│   │   │   │   ├── DoctorService.java
+│   │   │   │   ├── AppointmentService.java
+│   │   │   │   ├── DepartmentService.java
+│   │   │   │   ├── InsuranceService.java
+│   │   │   │   └── ...
+│   │   │   │
+│   │   │   ├── 📂 security
+│   │   │   │   ├── JwtAuthFilter.java
+│   │   │   │   ├── WebSecurityConfig.java
+│   │   │   │   ├── OAuth2SuccessHandler.java
+│   │   │   │   ├── CustomUserDetailService.java
+│   │   │   │   ├── RolePermissionMapping.java
+│   │   │   │   ├── AuthUtil.java
+│   │   │   │   └── ...
+│   │   │   │
+│   │   │   ├── 📂 error
+│   │   │   │   ├── GlobalExceptionHandler.java
+│   │   │   │   ├── ApiError.java
+│   │   │   │   └── ...
+│   │   │   │
+│   │   │   ├── 📂 type
+│   │   │   │   ├── RoleType.java
+│   │   │   │   ├── PermissionType.java
+│   │   │   │   ├── AuthProviderType.java
+│   │   │   │   ├── BloodGroupType.java
+│   │   │   │   └── ...
+│   │   │   │
+│   │   │   └── 🚀 ManagedHospitalApplication.java
+│   │   │
+│   │   └── 📂 resources
+│   │       ├── 📂 db
+│   │       │   └── 📂 migration
+│   │       │       ├── V1__initial_schema.sql
+│   │       │       └── ...
+│   │       ├── 📂 static
+│   │       ├── 📂 templates
 │   │       ├── application.yml
-│   │       ├── application-dev.yml
-│   │       └── application-prod.yml
-│   └── test/
-│       └── java/com/hms/                   # Unit & integration tests
-├── docker/
-│   ├── Dockerfile
-│   └── docker-compose.yml
-├── .env.example
-├── pom.xml
-└── README.md
+│   │       ├── application.properties
+│   │       ├── application-prod.properties
+│   │       └── data.sql
+│   │
+│   └── 📂 test
+│       ├── 📂 service
+│       ├── 📂 controller
+│       ├── 📂 repository
+│       └── ...
+│
+├── 🐳 Dockerfile
+├── 🐳 docker-compose.yml
+├── 📦 pom.xml
+├── 📄 README.md
+└── 📄 .env
 ```
 
 ---
@@ -299,12 +340,12 @@ hospital-management-system/
 Ensure the following tools are installed before setting up the project:
 
 | Tool | Minimum Version |
-|---|---|
-| Java (JDK) | 21+ |
-| Maven | 3.9+ |
-| Docker | 24.x+ |
-| Docker Compose | 2.x+ |
-| MySQL (if run locally without Docker) | 8.0+ |
+|---|-----------------|
+| Java (JDK) | 21+             |
+| Maven | 3.9+            |
+| Docker | 24.x+           |
+| Docker Compose | 2.x+            |
+| MySQL (if run locally without Docker) | latest          |
 
 ---
 
@@ -343,8 +384,8 @@ docker run -d \
   --network hms-network \
   -e MYSQL_ROOT_PASSWORD=root \
   -e MYSQL_DATABASE=hospital_db \
-  -p 3306:3306 \
-  mysql:8.0
+  -p 3307:3306 \
+  mysql:latest
 ```
 
 ### 6️⃣ Run Spring Boot Container
@@ -359,75 +400,52 @@ docker run -d \
   -p 8080:8080 \
   hms-backend:latest
 ```
+### 🐳 Run with Docker Compose
 
-> 💡 Alternatively, use `docker-compose up -d` from the `docker/` directory to spin up both containers with a single command.
+Start both the **Spring Boot application** and **MySQL database** in detached mode:
 
----
-
-## ⚙️ Application Configuration
-
-### Environment Variables
-
-| Variable | Description | Example |
-|---|---|---|
-| `SPRING_DATASOURCE_URL` | JDBC connection string | `jdbc:mysql://localhost:3306/hospital_db` |
-| `SPRING_DATASOURCE_USERNAME` | Database username | `root` |
-| `SPRING_DATASOURCE_PASSWORD` | Database password | `********` |
-| `JWT_SECRET` | Secret key used to sign JWTs | `********` |
-| `JWT_EXPIRATION` | Access token expiry (ms) | `3600000` |
-| `JWT_REFRESH_EXPIRATION` | Refresh token expiry (ms) | `604800000` |
-| `SERVER_PORT` | Application port | `8080` |
-
-### Application Properties
-
-<details>
-<summary>📄 Click to expand <code>application.yml</code></summary>
-
-```yaml
-server:
-  port: ${SERVER_PORT:8080}
-
-spring:
-  datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    show-sql: false
-  flyway:
-    enabled: true
-    locations: classpath:db/migration
-
-jwt:
-  secret: ${JWT_SECRET}
-  expiration: ${JWT_EXPIRATION:3600000}
-  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+```bash
+docker compose up -d
 ```
 
-</details>
+Or, if you're using a dedicated `docker/` directory:
 
-### Database Configuration
+```bash
+cd docker
+docker compose up -d
+```
 
-- Hibernate's `ddl-auto` is set to `validate` — schema changes are **only** applied through Flyway, never auto-generated.
-- Connection pooling is managed via HikariCP (Spring Boot default).
+To stop the containers:
 
-### Docker Configuration
+```bash
+docker compose down
+```
 
-- Multi-stage `Dockerfile` builds a slim runtime image using `eclipse-temurin:21-jre-alpine`.
-- `docker-compose.yml` orchestrates the app and database services on a shared bridge network.
+To rebuild the images after making changes:
 
-### Flyway Configuration
+```bash
+docker compose up --build -d
+```
 
-- Migrations are located at `src/main/resources/db/migration`.
-- Applied automatically on application startup — no manual intervention required.
+To view running containers:
+
+```bash
+docker compose ps
+```
+
+To view application logs:
+
+```bash
+docker compose logs -f
+```
 
 ---
+
+
 
 ## 📡 API Endpoints
 
-> Base URL: `http://localhost:8080/api/v1`
+> Base URL: `http://localhost:8080/indra`
 
 ### 🔐 Authentication
 
@@ -435,134 +453,78 @@ jwt:
 |---|---|---|
 | `POST` | `/auth/register` | Register a new user |
 | `POST` | `/auth/login` | Authenticate and receive JWT + refresh token |
-| `POST` | `/auth/refresh-token` | Obtain a new access token using a refresh token |
-| `POST` | `/auth/logout` | Invalidate the current session/token |
 
 ### 🧑‍🤝‍🧑 Patients
 
 | Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/patients` | Retrieve all patients *(Admin/Doctor)* |
-| `GET` | `/patients/{id}` | Retrieve a specific patient by ID |
-| `POST` | `/patients` | Create a new patient record |
-| `PUT` | `/patients/{id}` | Update patient details |
-| `DELETE` | `/patients/{id}` | Remove a patient record *(Admin only)* |
-
+|--------|----------|-------------|
+| `POST` | `/patient/newPatient` | Create a new patient record |
+| `POST` | `/patient/newAppointment` | Book a new appointment for a patient |
+| `POST` | `/patients/all` | Retrieve all patient records |
+| `GET` | `/patients/{id}` | Retrieve a patient by ID |
 ### 👨‍⚕️ Doctors
 
 | Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/doctors` | Retrieve all doctors |
-| `GET` | `/doctors/{id}` | Retrieve a specific doctor by ID |
-| `POST` | `/doctors` | Add a new doctor *(Admin only)* |
-| `PUT` | `/doctors/{id}` | Update doctor details |
-| `DELETE` | `/doctors/{id}` | Remove a doctor *(Admin only)* |
-
-### 📅 Appointments
+|--------|----------|-------------|
+| `GET` | `/doctor/doctors` | Retrieve all registered doctors |
+| `GET` | `/doctor/appointments` | Retrieve appointments assigned to the logged-in doctor |
+### 👨‍💼 Admin
 
 | Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/appointments` | Retrieve appointments (scoped by role) |
-| `GET` | `/appointments/{id}` | Retrieve a specific appointment |
-| `POST` | `/appointments` | Book a new appointment *(Patient)* |
-| `PUT` | `/appointments/{id}` | Reschedule/update an appointment |
-| `DELETE` | `/appointments/{id}` | Cancel an appointment |
+|--------|----------|-------------|
+| `POST` | `/admin/onBoardnewDoctor` | Add a new doctor to the hospital system |
+| `GET` | `/admin/patients` | Retrieve a list of all registered patients |
+| `GET` | `/admin/home` | Retrieve the admin dashboard and overview |
 
-### 📋 Medical Records
+---
+## 📖 Swagger API Documentation
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/medical-records/{patientId}` | Retrieve a patient's medical history |
-| `POST` | `/medical-records` | Create a new medical record *(Doctor)* |
-| `PUT` | `/medical-records/{id}` | Update a medical record *(Doctor)* |
+The project includes interactive API documentation powered by **Swagger UI (OpenAPI 3)**.
+
+The screenshots below provide a complete overview of all available REST endpoints.
+
+### 📄 Swagger API - Oauth2 Authorization
+
+<p align="center">
+  <a href="images/swagger/swagger-page-1.png">
+    <img src="src/main/resources/assets/page-1.png" width="900" alt="Swagger Page 1">
+  </a>
+</p>
 
 ---
 
-## 🐳 Docker Commands
+### 📄 Swagger API - Page 2
 
-A quick reference for common Docker operations used throughout this project's lifecycle.
-
-| Command | Purpose |
-|---|---|
-| `docker build -t hms-backend .` | Build an image from the Dockerfile |
-| `docker images` | List all local Docker images |
-| `docker run -d -p 8080:8080 hms-backend` | Run a container from an image |
-| `docker ps` | List running containers |
-| `docker ps -a` | List all containers (including stopped) |
-| `docker logs -f hms-backend` | Stream logs from a running container |
-| `docker exec -it hms-backend sh` | Open an interactive shell inside a container |
-| `docker start hms-backend` | Start a stopped container |
-| `docker stop hms-backend` | Stop a running container |
-| `docker restart hms-backend` | Restart a container |
-| `docker rm hms-backend` | Remove a stopped container |
-| `docker rmi hms-backend` | Remove an image |
-| `docker network create hms-network` | Create a custom bridge network |
-| `docker network ls` | List all Docker networks |
-| `docker network inspect hms-network` | Inspect network details and connected containers |
+<p align="center">
+  <a href="images/swagger/swagger-page-2.png">
+    <img src="src/main/resources/assets/page-2.png" width="900" alt="Swagger Page 2">
+  </a>
+</p>
 
 ---
 
-## 🗃️ Database Migration
+### 📄 Swagger API - Page 3
 
-This project uses **Flyway** for reliable, version-controlled database schema management.
-
-### Why Flyway?
-
-Flyway ensures the database schema evolves predictably alongside the codebase, with every change tracked, auditable, and reproducible across all environments (local, staging, production).
-
-### Migration Naming Convention
-
-```
-V<version>__<description>.sql
-
-Examples:
-V1__init_schema.sql
-V2__seed_roles_permissions.sql
-V3__add_prescription_table.sql
-```
-
-- `V` prefix denotes a **versioned** migration.
-- The version number must be unique and strictly increasing.
-- Double underscore (`__`) separates the version from the description.
-- Description uses `snake_case` and should clearly summarize the change.
-
-### Folder Structure
-
-```
-src/main/resources/db/migration/
-├── V1__init_schema.sql
-├── V2__seed_roles_permissions.sql
-├── V3__add_prescription_table.sql
-└── V4__add_indexes.sql
-```
-
-### ⚠️ Why Migrations Should Never Be Modified
-
-Once a migration has been applied to any environment, **it must never be edited**. Flyway tracks applied migrations via checksums in the `flyway_schema_history` table — modifying a previously executed script will cause a **checksum mismatch error** and break deployments. Instead, any correction must be introduced as a **new** migration file (e.g., `V5__fix_patient_column_type.sql`).
+<p align="center">
+  <a href="images/swagger/swagger-page-3.png">
+    <img src="src/main/resources/assets/page-3.png" width="900" alt="Swagger Page 3">
+  </a>
+</p>
 
 ---
 
-## 🔒 Security
+### 📄 Swagger API - Page 4
 
-### JWT Flow
+<p align="center">
+  <a href="images/swagger/swagger-page-3.png">
+    <img src="src/main/resources/assets/page-4.png" width="900" alt="Swagger Page 3">
+  </a>
+</p>
 
-1. User submits credentials to `/auth/login`.
-2. Server validates credentials against the stored (BCrypt-hashed) password.
-3. Upon success, the server issues a short-lived **access token** and a long-lived **refresh token**.
-4. The client includes the access token in the `Authorization: Bearer <token>` header on subsequent requests.
-5. When the access token expires, the client calls `/auth/refresh-token` to obtain a new one without re-entering credentials.
+> 💡 **Tip:** Click on any screenshot to view it in full resolution.
 
-### Authentication Flow
 
-```
-Login Request → Credential Validation → Token Generation → Token Returned to Client
-```
 
-### Authorization Flow
-
-```
-Incoming Request → JWT Validation → Load User Authorities → SecurityContext Population → @PreAuthorize Check → Controller Execution
-```
 
 ### Role Hierarchy
 
@@ -579,15 +541,13 @@ Incoming Request → JWT Validation → Load User Authorities → SecurityContex
                 │ PATIENT  │  (Self-service access)
                 └─────────┘
 ```
+## 🔐 Role-Based Access Control (RBAC)
 
-### Permission Mapping
-
-| Role | Sample Permissions |
-|---|---|
-| `ADMIN` | `USER_MANAGE`, `ROLE_MANAGE`, `PERMISSION_MANAGE`, `DOCTOR_MANAGE`, `PATIENT_MANAGE`, `ANALYTICS_VIEW` |
-| `DOCTOR` | `PATIENT_READ`, `APPOINTMENT_MANAGE`, `MEDICAL_RECORD_WRITE`, `PRESCRIPTION_WRITE` |
-| `PATIENT` | `APPOINTMENT_BOOK`, `PROFILE_UPDATE`, `PRESCRIPTION_READ` |
-
+| Role | Permissions |
+|------|-------------|
+| **ADMIN** | `PATIENT_READ`, `PATIENT_WRITE`, `APPOINTMENT_READ`, `APPOINTMENT_WRITE`, `APPOINTMENT_DELETE`, `USER_MANAGE`, `REPORT_VIEW` |
+| **DOCTOR** | `PATIENT_READ`, `PATIENT_WRITE`, `APPOINTMENT_READ`, `APPOINTMENT_WRITE`, `APPOINTMENT_DELETE` |
+| **PATIENT** | `PATIENT_READ`, `APPOINTMENT_READ`, `APPOINTMENT_WRITE` |
 ---
 
 ## ⚠️ Error Handling
@@ -603,49 +563,16 @@ The application implements a centralized `@ControllerAdvice`-based exception han
   "path": "/api/v1/patients/42"
 }
 ```
-
-| Exception | HTTP Status |
-|---|---|
-| `ResourceNotFoundException` | `404 Not Found` |
-| `BadCredentialsException` | `401 Unauthorized` |
-| `AccessDeniedException` | `403 Forbidden` |
-| `MethodArgumentNotValidException` | `400 Bad Request` |
-| `DataIntegrityViolationException` | `409 Conflict` |
-| `Exception` (fallback) | `500 Internal Server Error` |
-
----
-
-## 🚢 Deployment
-
-- The application is packaged as a Docker image and can be deployed to any container orchestration platform (Kubernetes, ECS, Docker Swarm).
-- Recommended production setup includes a managed MySQL instance, environment-based secret management (e.g., Vault, AWS Secrets Manager), and a reverse proxy (Nginx) with TLS termination.
-- CI/CD pipelines (GitHub Actions placeholder) can automate build, test, image push, and deployment steps.
-
 ---
 
 ## 🔮 Future Enhancements
 
 - 📧 Email/SMS notifications for appointment reminders
-- 📊 Advanced analytics dashboard for administrators
 - 🧾 Billing and invoicing module
 - 🗓️ Doctor availability calendar with time-slot booking
-- 🌐 Multi-tenancy support for hospital chains
-- 📱 Mobile application integration
 - 🧪 Lab test result management
 
 ---
-
-## 🤝 Contribution Guide
-
-Contributions are welcome! To contribute:
-
-1. **Fork** the repository
-2. Create a feature branch: `git checkout -b feature/your-feature-name`
-3. Commit your changes: `git commit -m "Add: your feature description"`
-4. Push to your branch: `git push origin feature/your-feature-name`
-5. Open a **Pull Request** describing your changes
-
-Please ensure all new code is covered by unit tests and follows existing code style conventions.
 
 ---
 ## 👤 Author
@@ -655,15 +582,10 @@ Please ensure all new code is covered by unit tests and follows existing code st
 **Indrajit Maity**
 
 [![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/<your-username>)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/<your-profile>)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](www.linkedin.com/in/indrajit-maity-2a7061285)
 [![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](2005indrajitmaity@gmail.com)
 
 </div>
 
 ---
 
-<div align="center">
-
-⭐ **If you find this project useful, consider giving it a star!** ⭐
-
-</div>
