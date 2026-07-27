@@ -497,7 +497,7 @@ The screenshots below provide a complete overview of all available REST endpoint
 
 <p align="center">
   <a href="src/main/resources/assets/page-2.png">
-    <img src="src/main/resources/assets/page-2.png" width="900" alt="Swagger Page 2">
+    <img src="src/main/resources/assets/Page-2.png" width="900" alt="Swagger Page 2">
   </a>
 </p>
 
