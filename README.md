@@ -486,7 +486,7 @@ The screenshots below provide a complete overview of all available REST endpoint
 ### 📄 Swagger API - Oauth2 Authorization
 
 <p align="center">
-  <a href="images/swagger/swagger-page-1.png">
+  <a href="src/main/resources/assets/page-1.png.png">
     <img src="src/main/resources/assets/page-1.png" width="900" alt="Swagger Page 1">
   </a>
 </p>
@@ -496,7 +496,7 @@ The screenshots below provide a complete overview of all available REST endpoint
 ### 📄 Swagger API - Page 2
 
 <p align="center">
-  <a href="images/swagger/swagger-page-2.png">
+  <a href="src/main/resources/assets/page-2.png">
     <img src="src/main/resources/assets/page-2.png" width="900" alt="Swagger Page 2">
   </a>
 </p>
@@ -506,7 +506,7 @@ The screenshots below provide a complete overview of all available REST endpoint
 ### 📄 Swagger API - Page 3
 
 <p align="center">
-  <a href="images/swagger/swagger-page-3.png">
+  <a href="src/main/resources/assets/page-3.png.png">
     <img src="src/main/resources/assets/page-3.png" width="900" alt="Swagger Page 3">
   </a>
 </p>
@@ -516,7 +516,7 @@ The screenshots below provide a complete overview of all available REST endpoint
 ### 📄 Swagger API - Page 4
 
 <p align="center">
-  <a href="images/swagger/swagger-page-3.png">
+  <a href="src/main/resources/assets/page-4.png.png">
     <img src="src/main/resources/assets/page-4.png" width="900" alt="Swagger Page 3">
   </a>
 </p>
@@ -574,16 +574,23 @@ The application implements a centralized `@ControllerAdvice`-based exception han
 
 ---
 
----
 ## 👤 Author
 
 <div align="center">
 
 **Indrajit Maity**
 
-[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/<your-username>)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](www.linkedin.com/in/indrajit-maity-2a7061285)
-[![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](2005indrajitmaity@gmail.com)
+<a href="https://github.com/indrajit-maity">
+  <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
+</a>
+&nbsp;
+<a href="https://www.linkedin.com/in/indrajit-maity-2a7061285/">
+  <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
+</a>
+&nbsp;
+<a href="mailto:2005indrajitmaity@gmail.com">
+  <img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email">
+</a>
 
 </div>
 
