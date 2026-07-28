@@ -571,7 +571,6 @@ The application implements a centralized `@ControllerAdvice`-based exception han
 - 🧾 Billing and invoicing module
 - 🗓️ Doctor availability calendar with time-slot booking
 - 🧪 Lab test result management
-
 ---
 
 ## 👤 Author
